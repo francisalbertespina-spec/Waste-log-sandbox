@@ -1644,7 +1644,6 @@ window.onload=async function(){
     applyTheme(prefs.theme||'default');
     displayUserInfo(email.split('@')[0],role||'user');
     if(role==='admin'||role==='super_admin') enableAdminUI();
-    showSidebarForLoggedInUser();
     // Show a "Resuming session…" overlay on the login section
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     const loginSec=document.getElementById('login-section');
@@ -1658,6 +1657,7 @@ window.onload=async function(){
       if(prefs.defaultPackage) selectedPackage=prefs.defaultPackage;
       if(role==='admin'||role==='super_admin') initNotifications();
       startSessionMonitoring();
+      showSidebarForLoggedInUser();
       showSection('package-section');
       showToast(`Welcome back! ${Math.floor(getTimeUntilExpiry()/60)}h left`,'success');
       return;
