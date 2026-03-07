@@ -403,9 +403,10 @@ input:checked+.toggle-slider:before { transform:translateX(23px); }
   background: linear-gradient(135deg, #d32f2f, #b71c1c);
   color: white;
   box-shadow: 0 4px 14px rgba(211,47,47,0.3);
+  padding: 14px;
 }
 .btn-primary:hover  { box-shadow: 0 6px 20px rgba(211,47,47,0.4); transform:translateY(-1px); }
-.btn-secondary { background:var(--bg2); color:var(--text); border:1.5px solid var(--border); }
+.btn-secondary { background:var(--bg2); color:var(--text); border:1.5px solid var(--border); padding: 14px;}
 .btn-secondary:hover { background:var(--bg3); border-color:var(--text3); }
 .btn-sm {
   width: auto;
@@ -424,21 +425,19 @@ input:checked+.toggle-slider:before { transform:translateX(23px); }
 .btn-sm:hover { background:var(--primary); color:white; transform:translateY(-1px); box-shadow: 0 3px 10px rgba(211,47,47,0.3); }
 .btn-group { display:grid; gap:10px; margin-top:22px; }
 .back-btn {
-  background: none;
-  border: none;
-  color: var(--primary);
-  font-size: 0.92rem;
-  font-family: inherit;
-  cursor: pointer;
-  padding: 8px 0;
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-weight: 600;
-  transition: opacity var(--transition);
-}
-.back-btn:hover { opacity:0.7; }
+    display: inline-flex;
+    width: auto;
+    margin-bottom: 20px;
+    padding: 6px 14px;
+    background: var(--bg2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    font-size: 0.83rem;
+    font-weight: 600;
+    transition: all var(--transition);
+  }
+  .back-btn:hover { background: var(--bg3); color: var(--primary); border-color: var(--primary); opacity: 1; }
 
 /* ═══════════════════════════════════════════════════════
    FILTER BAR (history sections)
