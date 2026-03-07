@@ -450,6 +450,15 @@ function sortUsers(users) {
 let _allUsers = []; // cache for client-side filtering
 
 async function loadUsers() {
+  // Show spinner in table and disable refresh button
+  const tbody = document.getElementById('usersTableBody');
+  const refreshBtn = document.querySelector('#user-management-section .btn-sm');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:28px 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div class="spinner" style="margin:0;"></div>
+      <span style="color:#999;font-size:0.88rem;">Loading users…</span>
+    </div></td></tr>`;
+  if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.textContent = '…'; }
   try {
     const res   = await authenticatedFetch(`${scriptURL}?action=getUsers`);
     const users = await res.json();
@@ -458,8 +467,11 @@ async function loadUsers() {
     const p = users.filter(u=>u.status==='Pending').length;
     updatePendingBadge(p);
     lastKnownPendingCount = p;
-    applyUserFilters(); // render with any active filters
+    applyUserFilters();
   } catch { showToast("Failed to load users","error"); }
+  finally {
+    if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = '↻ Refresh'; }
+  }
 }
 
 function applyUserFilters() {
@@ -527,7 +539,33 @@ async function deleteUser(email) {
   try { const r=await authenticatedFetch(`${scriptURL}?action=deleteUser&email=${encodeURIComponent(email)}`); const d=await r.json(); if(d.success||d.status==='success'){showToast('Deleted','success');loadUsers();}else showToast(d.message||'Failed','error'); } catch{showToast('Error deleting','error');}
 }
 async function loadRequests() {
-  try { const r=await authenticatedFetch(`${scriptURL}?action=getRequests`); const list=await r.json(); const tb=document.getElementById("requestsTableBody"); tb.innerHTML=""; list.forEach(req=>{const tr=document.createElement("tr"); tr.innerHTML=`<td style="text-align:left;">${req.id}</td><td>${new Date(req.time).toLocaleString()}</td>`; tb.appendChild(tr);}); } catch{showToast("Failed to load logs","error");}
+  const tb = document.getElementById("requestsTableBody");
+  const refreshBtn = document.querySelector('#request-logs-section .btn-sm');
+  if (tb) tb.innerHTML = `<tr><td colspan="2" style="text-align:center;padding:28px 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div class="spinner" style="margin:0;"></div>
+      <span style="color:#999;font-size:0.88rem;">Loading logs…</span>
+    </div></td></tr>`;
+  if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.textContent = '…'; }
+  try {
+    const r = await authenticatedFetch(`${scriptURL}?action=getRequests`);
+    const list = await r.json();
+    if (tb) {
+      tb.innerHTML = "";
+      if (!list.length) {
+        tb.innerHTML = `<tr><td colspan="2" style="text-align:center;padding:20px;color:#999;">No logs found</td></tr>`;
+      } else {
+        list.forEach(req => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td style="text-align:left;">${req.id}</td><td>${new Date(req.time).toLocaleString()}</td>`;
+          tb.appendChild(tr);
+        });
+      }
+    }
+  } catch { showToast("Failed to load logs","error"); }
+  finally {
+    if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = 'Refresh'; }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1554,10 +1592,10 @@ function closeImageModal(){document.getElementById("imageModal").style.display="
 // DESKTOP SIDEBAR LOGIC
 // ═══════════════════════════════════════════════════════════════════════════
 
-const DESKTOP_BP = 900; // px — matches CSS breakpoint
-
+const DESKTOP_BP = 900;
 function isDesktop() { return window.innerWidth >= DESKTOP_BP; }
 
+/* ── Show/hide sidebar shell ── */
 function initDesktopLayout() {
   const sidebar = document.getElementById('desktop-sidebar');
   if (!sidebar) return;
@@ -1569,78 +1607,109 @@ function initDesktopLayout() {
   }
 }
 
-// Update sidebar active state whenever section changes
+/* ── Reveal nav + footer after login ── */
+function showSidebarForLoggedInUser() {
+  const nav    = document.getElementById('sb-nav');
+  const footer = document.getElementById('sb-footer');
+  if (nav)    nav.style.display    = 'flex';
+  if (footer) footer.style.display = 'flex';
+}
+
+/* ── Hide nav + footer on logout ── */
+function hideSidebarForLoggedOutUser() {
+  const nav    = document.getElementById('sb-nav');
+  const footer = document.getElementById('sb-footer');
+  if (nav)    nav.style.display    = 'none';
+  if (footer) footer.style.display = 'none';
+}
+
+/* ── Intercept showSection to update active state ── */
 const _origShowSection = showSection;
 window.showSection = function(id) {
   _origShowSection(id);
   updateSidebarActiveState(id);
+  // scroll content area back to top on section change
+  const content = document.querySelector('.content');
+  if (content) content.scrollTop = 0;
 };
 
-function updateSidebarActiveState(id) {
+function updateSidebarActiveState(sectionId) {
   document.querySelectorAll('.sidebar-nav-item').forEach(el => el.classList.remove('active'));
+
+  // Section → which sidebar item to highlight
   const map = {
-    'package-section':           'sb-pkg-p4',   // generic fallback
     'hazardous-form-section':    'sb-haz-log',
     'hazardous-history-section': 'sb-haz-records',
     'solid-form-section':        'sb-solid-log',
     'solid-history-section':     'sb-solid-records',
-    'admin-dashboard':           null,
-    'user-management-section':   null,
-    'analytics-section':         null,
-    'request-logs-section':      null,
+    'admin-dashboard':           'sb-admin-dash',
+    'user-management-section':   'sb-admin-users',
+    'analytics-section':         'sb-admin-analytics',
+    'request-logs-section':      'sb-admin-logs',
+    'user-settings-section':     'sb-settings',
   };
-  const targetId = map[id];
+
+  const targetId = map[sectionId];
   if (targetId) {
     const el = document.getElementById(targetId);
     if (el) el.classList.add('active');
   }
-  // highlight correct package button
+
+  // Always keep the current package highlighted
   if (selectedPackage) {
     const pkgEl = document.getElementById(`sb-pkg-${selectedPackage.toLowerCase()}`);
     if (pkgEl) pkgEl.classList.add('active');
   }
-  // show/hide waste nav items
+
   updateSidebarWasteItems();
 }
 
 function updateSidebarWasteItems() {
   const hasPackage = !!selectedPackage;
-  ['sb-waste-label','sb-haz-log','sb-haz-records','sb-solid-label','sb-solid-log','sb-solid-records'].forEach(id => {
+  const wasteIds = [
+    'sb-waste-divider','sb-haz-label','sb-haz-log','sb-haz-records',
+    'sb-solid-label','sb-solid-log','sb-solid-records'
+  ];
+  wasteIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = hasPackage ? '' : 'none';
   });
 }
 
-// Sidebar: select package and go straight to waste type section
+/* ── Sidebar package selection ── */
 function sidebarSelectPackage(pkg) {
-  // Update package cards too so mobile is consistent
-  const cards = document.querySelectorAll('.package-card');
-  cards.forEach(c => {
+  // Sync the mobile package cards selection state
+  document.querySelectorAll('.package-card').forEach(c => {
     c.classList.remove('selected');
-    if (c.querySelector('.name')?.textContent === `Package ${pkg.replace('P','')}`) {
+    if (c.querySelector('.name')?.textContent.trim() === `Package ${pkg.replace('P','')}`) {
       c.classList.add('selected');
     }
   });
+
   selectedPackage = pkg;
-  updateBreadcrumbs();
+  if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs();
   updateSidebarWasteItems();
-  // Highlight the clicked sidebar pkg item
+
+  // Highlight sidebar package button
   ['p4','p5','p6'].forEach(p => {
     const el = document.getElementById(`sb-pkg-${p}`);
-    if (el) el.classList.toggle('active', `P${p.toUpperCase().replace('P','')}` === pkg || `sb-pkg-${p}` === `sb-pkg-${pkg.toLowerCase()}`);
+    if (el) el.classList.toggle('active', `P${p.slice(1).toUpperCase()}` === pkg || `p${p.slice(1)}` === pkg.toLowerCase().slice(1));
   });
+  // Direct approach — just highlight the right one
   document.getElementById(`sb-pkg-${pkg.toLowerCase()}`)?.classList.add('active');
-  // On desktop skip the package section, go straight to waste type
+
+  // On desktop skip the redundant package picker, go to waste type
   if (isDesktop()) {
-    showSection('waste-type-section');
-  } else {
-    showSection('package-section');
+    _origShowSection('waste-type-section');
+    updateSidebarActiveState('waste-type-section');
+    const content = document.querySelector('.content');
+    if (content) content.scrollTop = 0;
   }
 }
 
-// Sidebar: direct navigation to log/records
+/* ── Sidebar shortcut to log/records ── */
 function sidebarNav(type, action) {
-  if (!selectedPackage) { showToast('Select a package first','error'); return; }
+  if (!selectedPackage) { showToast('Please select a package first', 'error'); return; }
   if (action === 'log') {
     showLogForm(type);
   } else {
@@ -1648,7 +1717,7 @@ function sidebarNav(type, action) {
   }
 }
 
-// Override updatePendingBadge to also update sidebar badge
+/* ── Mirror pending badge to sidebar ── */
 const _origUpdatePendingBadge = updatePendingBadge;
 window.updatePendingBadge = function(count) {
   _origUpdatePendingBadge(count);
@@ -1659,21 +1728,35 @@ window.updatePendingBadge = function(count) {
   }
 };
 
-// Override enableAdminUI to also show sidebar admin items
+/* ── After login: reveal sidebar nav & footer ── */
 const _origEnableAdminUI = enableAdminUI;
 window.enableAdminUI = function() {
   _origEnableAdminUI();
-  // Admin-only sidebar items are handled by the existing .admin-only CSS rule
-  // which checks body.is-admin — so this works automatically
+  // admin-only items show via body.is-admin CSS — nothing extra needed
 };
 
-// On resize, show/hide sidebar
+// Hook into the login flow by patching showSection —
+// whenever package-section becomes active it means user is logged in
+const __patched_ss = window.showSection;
+window.showSection = function(id) {
+  __patched_ss(id);
+  if (id === 'package-section' || id === 'admin-dashboard' ||
+      id === 'hazardous-menu-section' || id === 'solid-menu-section') {
+    showSidebarForLoggedInUser();
+  }
+  if (id === 'login-section') {
+    hideSidebarForLoggedOutUser();
+  }
+};
+
+/* ── On resize ── */
 window.addEventListener('resize', () => {
   initDesktopLayout();
-  updateSidebarActiveState(document.querySelector('.section.active')?.id || '');
+  const active = document.querySelector('.section.active');
+  if (active) updateSidebarActiveState(active.id);
 });
 
-// Init on load
+/* ── On DOMContentLoaded ── */
 document.addEventListener('DOMContentLoaded', () => {
   initDesktopLayout();
 });
