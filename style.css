@@ -223,6 +223,7 @@ body {
 /* Admin-only visibility */
 .admin-only { display: none !important; }
 .desktop-only { display: none; }
+.settings-save-row.desktop-only { display: none; }
 body.is-admin .mode-toggle.admin-only   { display: flex !important; }
 body.is-admin .notif-bell.admin-only    { display: flex !important; }
 body.is-admin .section.admin-only.active { display: block !important; }
@@ -1163,6 +1164,7 @@ td a.photo-link:hover { background: rgba(211,47,47,0.15); }
   .mobile-only { display: none !important; }
   /* ── Show desktop-only ── */
   .desktop-only { display: flex !important; }
+  .settings-save-row.desktop-only { display: flex; }
 
   /* ── Admin-only override ── */
   body.is-admin .section.admin-only.active { display: block !important; }
