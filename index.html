@@ -355,10 +355,16 @@
               <button class="btn btn-secondary settings-btn" onclick="clearSessionHistory()">🗑 Clear Local History</button>
             </div>
 
-            <div class="settings-save-row">
+            <!-- Mobile-only save row (inside column, shows on mobile) -->
+            <div class="settings-save-row mobile-only">
               <button class="btn btn-primary" onclick="saveUserSettings()">💾 Save Settings</button>
-              <button class="btn btn-secondary mobile-only" onclick="logout()">Sign Out</button>
+              <button class="btn btn-secondary" onclick="logout()">Sign Out</button>
             </div>
+          </div>
+
+          <!-- Desktop save row: spans both columns, anchored at bottom -->
+          <div class="settings-save-row desktop-only">
+            <button class="btn btn-primary" onclick="saveUserSettings()">💾 Save Settings</button>
           </div>
         </div>
       </div>

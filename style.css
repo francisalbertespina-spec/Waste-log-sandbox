@@ -222,6 +222,7 @@ body {
 
 /* Admin-only visibility */
 .admin-only { display: none !important; }
+.desktop-only { display: none; }
 body.is-admin .mode-toggle.admin-only   { display: flex !important; }
 body.is-admin .notif-bell.admin-only    { display: flex !important; }
 body.is-admin .section.admin-only.active { display: block !important; }
@@ -471,7 +472,7 @@ input:checked+.toggle-slider:before { transform:translateX(23px); }
 .filter-col select:focus { outline:none; border-color:var(--primary); }
 
 .history-actions { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-.history-actions .btn { flex:1; min-width:100px; height:40px; font-size:0.82rem; }
+.history-actions .btn { flex:1; min-width:120px; height:50px; font-size:0.9rem; }
 
 /* ═══════════════════════════════════════════════════════
    USER SETTINGS
@@ -1098,6 +1099,9 @@ td a.photo-link:hover { background: rgba(211,47,47,0.15); }
   .table-wrapper { border-radius: var(--radius-lg); }
   table { font-size: 0.86rem; }
   th, td { padding: 10px 12px; }
+  /* Ensure Photo and Actions columns are wide enough to never wrap */
+  th:nth-child(5), td:nth-child(5) { width: 80px; white-space: nowrap; }
+  th:nth-child(6), td:nth-child(6) { width: 110px; white-space: nowrap; }
 
   /* ── KPI grid — 4 columns ── */
   .kpi-grid { grid-template-columns: repeat(4, 1fr); }
@@ -1125,8 +1129,21 @@ td a.photo-link:hover { background: rgba(211,47,47,0.15); }
     margin-top: 4px;
   }
   .settings-col      { gap: 16px; }
-  .settings-save-row { margin-top: 8px; }
   .settings-card     { margin-bottom: 0; }
+  /* Save row: full width spanning both columns, sits at the bottom */
+  .settings-save-row {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-lt);
+  }
+  .settings-save-row .btn {
+    min-width: 160px;
+    width: auto;
+  }
 
   /* ── Admin dashboard grid ── */
   .admin-menu-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
@@ -1138,6 +1155,8 @@ td a.photo-link:hover { background: rgba(211,47,47,0.15); }
 
   /* ── Hide mobile-only ── */
   .mobile-only { display: none !important; }
+  /* ── Show desktop-only ── */
+  .desktop-only { display: flex !important; }
 
   /* ── Admin-only override ── */
   body.is-admin .section.admin-only.active { display: block !important; }
