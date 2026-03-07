@@ -222,6 +222,15 @@ input:checked+.toggle-slider:before { transform:translateX(23px); }
 .section { display:none; }
 .section.active { display:block; animation:fadeIn 0.3s ease-out; }
 @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+/* Used by logout modal card (flex-centred, no translateX needed) */
+@keyframes modal-pop {
+  from { opacity:0; transform:translateY(14px) scale(0.88); }
+  to   { opacity:1; transform:translateY(0)    scale(1);    }
+}
+@keyframes modal-pop-out {
+  from { opacity:1; transform:translateY(0)    scale(1);    }
+  to   { opacity:0; transform:translateY(10px) scale(0.92); }
+}
 
 .section-title { font-size:1.35rem; font-weight:700; color:var(--text); margin-bottom:20px; text-align: center; }
 .section-sub   { color:var(--text2); font-size:0.9rem; margin-bottom:30px; text-align: center; }
@@ -342,6 +351,10 @@ body.theme-dark .settings-card-danger { background:#281810; border-color:#5a2a14
 .settings-select:focus { outline:none; border-color:var(--primary); }
 .settings-btn { width:auto; height:38px; padding:0 16px; font-size:0.86rem; }
 .notif-actions { display:flex; gap:10px; padding-top:10px; flex-wrap:wrap; }
+/* Settings layout — single col on mobile */
+.settings-grid     { display:flex; flex-direction:column; gap:14px; }
+.settings-col      { display:flex; flex-direction:column; gap:14px; }
+.settings-save-row { display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; }
 
 /* ═══════════════════════════════════════════════════════
    ANALYTICS
@@ -524,19 +537,65 @@ td a.photo-link { color:#2563eb; cursor:pointer; text-decoration:underline; }
 .empty-state .icon { font-size:3.5rem; margin-bottom:12px; opacity:0.3; }
 
 /* ═══════════════════════════════════════════════════════
-   TOAST
+   TOAST  — Sileo-style frosted-glass pill, bottom-centre
 ═══════════════════════════════════════════════════════ */
-.toast { position:fixed; top:18px; right:18px; background:white; padding:14px 18px; border-radius:var(--radius); box-shadow:0 8px 28px rgba(0,0,0,0.28); display:flex; align-items:center; gap:10px; z-index:1000; animation:slideInRight 0.3s ease-out; max-width:400px; min-width:260px; }
-@keyframes slideInRight { from{transform:translateX(380px);opacity:0;} to{transform:translateX(0);opacity:1;} }
-.toast.hide { animation:slideOutRight 0.3s ease-out forwards; }
-@keyframes slideOutRight { from{transform:translateX(0);opacity:1;} to{transform:translateX(380px);opacity:0;} }
-.toast.success { border-left:4px solid #4caf50; }
-.toast.error   { border-left:4px solid #f44336; }
-.toast.info    { border-left:4px solid #2196f3; }
-.toast-icon    { width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:18px; }
-.toast-message { flex:1; font-size:0.9rem; font-weight:500; color:#333; line-height:1.45; word-break:break-word; }
-.toast-spinner { width:16px; height:16px; border:2.5px solid #ddd; border-top:2.5px solid #555; border-radius:50%; animation:spin 0.8s linear infinite; }
-@media(max-width:480px){ .toast{left:14px;right:14px;max-width:none;min-width:auto;} }
+.toast {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(28, 28, 32, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.13);
+  color: #fff;
+  padding: 11px 20px 11px 12px;
+  border-radius: 999px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.36), 0 2px 8px rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 99999;
+  max-width: 340px;
+  min-width: 180px;
+  width: max-content;
+  animation: sileo-up 0.44s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes sileo-up {
+  from { opacity:0; transform:translateX(-50%) translateY(18px) scale(0.86); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0)    scale(1);    }
+}
+.toast.hide {
+  animation: sileo-down 0.26s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+@keyframes sileo-down {
+  from { opacity:1; transform:translateX(-50%) translateY(0)    scale(1);   }
+  to   { opacity:0; transform:translateX(-50%) translateY(14px) scale(0.9); }
+}
+.toast-icon {
+  width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 900; letter-spacing: -0.5px;
+}
+.toast.success .toast-icon { background: #4caf50; color: #fff; }
+.toast.error   .toast-icon { background: #f44336; color: #fff; }
+.toast.info    .toast-icon { background: #2196f3; color: #fff; }
+.toast-message {
+  flex: 1; font-size: 0.875rem; font-weight: 600;
+  color: rgba(255,255,255,0.95); line-height: 1.4;
+  word-break: break-word; letter-spacing: 0.01em;
+}
+.toast-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@media(max-width:480px){
+  .toast { bottom: 24px; max-width: calc(100vw - 32px); min-width: 160px; }
+}
 
 /* ═══════════════════════════════════════════════════════
    LOGIN
@@ -887,10 +946,19 @@ td a.photo-link { color:#2563eb; cursor:pointer; text-decoration:underline; }
   /* ── Analytics chart taller ── */
   .chart-wrap { height: 280px; }
 
-  /* ── Settings — constrain width to remove excess whitespace ── */
-  #user-settings-section .section-card-wrap { max-width: 520px; }
-  .settings-card { max-width: 100%; }
-  .settings-value { max-width: 70%; }
+  /* ── Settings — landscape two-col on desktop ── */
+  #user-settings-section .section-card-wrap { max-width: 860px; }
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-top: 4px;
+  }
+  .settings-col      { gap: 16px; }
+  .settings-save-row { margin-top: 8px; }
+  .settings-card     { margin-bottom: 0; }
+  .settings-value    { max-width: 65%; }
 
   /* ── Admin dashboard grid ── */
   .admin-menu-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }

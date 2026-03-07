@@ -315,9 +315,8 @@ function processToastQueue() {
   const {msg,type,persistent,spinner,duration} = toastQueue.shift();
   const t = document.createElement("div"); t.className=`toast ${type}`;
   const ic = document.createElement("div"); ic.className="toast-icon";
-  if (spinner) { const s=document.createElement("div"); s.className="toast-spinner"; ic.appendChild(s); }
-  else ic.textContent = {success:"✅",error:"❌",info:"ℹ️"}[type]||"ℹ️";
-  t.appendChild(ic);
+  if (spinner) { const s=document.createElement("div"); s.className="toast-spinner"; t.appendChild(s); }
+  else { ic.textContent = {success:"✓",error:"✕",info:"i"}[type]||"i"; t.appendChild(ic); }
   const m = document.createElement("div"); m.className="toast-message"; m.textContent=msg;
   t.appendChild(m); document.body.appendChild(t); activeToast=t;
   if (!persistent) toastTimer = setTimeout(()=>dismissToast(t), type==="error"?8000:duration||3000);
@@ -325,7 +324,7 @@ function processToastQueue() {
 function dismissToast(t) {
   if (!t) return; clearTimeout(toastTimer); toastTimer=null;
   t.classList.add("hide");
-  setTimeout(()=>{ t.remove(); activeToast=null; processToastQueue(); },300);
+  setTimeout(()=>{ t.remove(); activeToast=null; processToastQueue(); },280);
 }
 function setLoginLoading(on) {
   const b=document.getElementById("buttonDiv"), l=document.getElementById("loginLoadingUI");
@@ -1535,18 +1534,84 @@ function updateModeLabels(on){document.getElementById('mode-label-user')?.classL
 function updateToggleState(id){const t=document.getElementById('admin-mode-toggle');if(!t)return;const admin=['admin-dashboard','user-management-section','request-logs-section','analytics-section'].includes(id);t.checked=admin;updateModeLabels(admin);}
 function enableAdminUI(){document.body.classList.add("is-admin");const mt=document.getElementById('mode-toggle');if(mt)mt.style.display='flex';}
 
-async function logout(){
-  if(!confirm('Sign out?'))return;
-  showToast('Signing out…','info',{persistent:true});
-  try{await authenticatedFetch(`${scriptURL}?action=logout`);}catch{}
-  ['userToken','tokenExpiry','userRole','userEmail','completedSubmissions'].forEach(k=>localStorage.removeItem(k));
-  document.body.classList.remove('is-admin');
-  const ui=document.getElementById('user-info');if(ui)ui.style.display='none';
-  if(sessionCheckTimer){clearInterval(sessionCheckTimer);sessionCheckTimer=null;}
-  stopTokenRefreshTimer();stopNotifPolling();
-  if(window.google?.accounts?.id)google.accounts.id.disableAutoSelect();
-  showSection('login-section');
-  setTimeout(()=>location.reload(),500);
+function logout() {
+  // Build a polished sign-out confirmation modal
+  const existing = document.getElementById('logout-modal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'logout-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:99998;animation:fadeIn 0.18s ease-out;';
+
+  overlay.innerHTML = `
+    <div style="
+      background:var(--bg,#fff);border-radius:22px;padding:34px 28px 26px;
+      width:90%;max-width:310px;text-align:center;
+      box-shadow:0 28px 64px rgba(0,0,0,0.26),0 4px 16px rgba(0,0,0,0.12);
+      border:1px solid var(--border,#e8e8e8);
+      animation:modal-pop 0.38s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    ">
+      <div style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#ff5252 0%,#c62828 100%);
+        display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+        box-shadow:0 8px 22px rgba(198,40,40,0.38);font-size:1.5rem;line-height:1;">🚪</div>
+      <h3 style="margin:0 0 7px;font-size:1.08rem;color:var(--text,#1a1a1a);font-weight:750;letter-spacing:-0.2px;">Sign out?</h3>
+      <p style="margin:0 0 26px;font-size:0.85rem;color:var(--text2,#777);line-height:1.55;">
+        You'll need to sign back in to access the WMS.
+      </p>
+      <div style="display:flex;gap:10px;">
+        <button id="lo-cancel" style="
+          flex:1;height:44px;border-radius:13px;
+          border:1.5px solid var(--border,#e0e0e0);
+          background:var(--bg2,#f5f5f5);color:var(--text,#333);
+          font-size:0.88rem;font-weight:650;cursor:pointer;transition:background 0.15s;">
+          Cancel
+        </button>
+        <button id="lo-confirm" style="
+          flex:1;height:44px;border-radius:13px;border:none;
+          background:linear-gradient(135deg,#e53935,#c62828);
+          color:#fff;font-size:0.88rem;font-weight:700;
+          cursor:pointer;letter-spacing:0.02em;
+          box-shadow:0 4px 14px rgba(198,40,40,0.32);
+          transition:transform 0.15s,box-shadow 0.15s;">
+          Sign Out
+        </button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  const cancelBtn  = overlay.querySelector('#lo-cancel');
+  const confirmBtn = overlay.querySelector('#lo-confirm');
+
+  const closeModal = () => {
+    overlay.style.animation = 'fadeIn 0.2s ease-out reverse forwards';
+    setTimeout(() => overlay.remove(), 200);
+  };
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  cancelBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('mouseenter', () => cancelBtn.style.background = 'var(--border-lt,#ebebeb)');
+  cancelBtn.addEventListener('mouseleave', () => cancelBtn.style.background = 'var(--bg2,#f5f5f5)');
+  confirmBtn.addEventListener('mouseenter', () => { confirmBtn.style.transform='translateY(-1px)'; confirmBtn.style.boxShadow='0 7px 20px rgba(198,40,40,0.42)'; });
+  confirmBtn.addEventListener('mouseleave', () => { confirmBtn.style.transform=''; confirmBtn.style.boxShadow='0 4px 14px rgba(198,40,40,0.32)'; });
+
+  confirmBtn.addEventListener('click', async () => {
+    closeModal();
+    await new Promise(r => setTimeout(r, 160));
+    showToast('Signing out…', 'info', {persistent:true, spinner:true});
+    try { await authenticatedFetch(`${scriptURL}?action=logout`); } catch {}
+    ['userToken','tokenExpiry','userRole','userEmail','completedSubmissions'].forEach(k => localStorage.removeItem(k));
+    document.body.classList.remove('is-admin');
+    const ui = document.getElementById('user-info'); if (ui) ui.style.display = 'none';
+    if (sessionCheckTimer) { clearInterval(sessionCheckTimer); sessionCheckTimer = null; }
+    stopTokenRefreshTimer(); stopNotifPolling();
+    if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
+    if (activeToast) dismissToast(activeToast);
+    showToast('Signed out — see you soon! 👋', 'success', {duration: 2400});
+    showSection('login-section');
+    if (typeof hideSidebarForLoggedOutUser === 'function') hideSidebarForLoggedOutUser();
+    setTimeout(() => location.reload(), 2600);
+  });
 }
 
 async function handleCredentialResponse(response){

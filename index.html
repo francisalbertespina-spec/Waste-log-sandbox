@@ -313,51 +313,59 @@
 
     <!-- ═══ USER SETTINGS ═══ -->
     <div id="user-settings-section" class="section">
-      <div class="section-card-wrap">
+      <div class="section-card-wrap settings-wrap">
         <button class="back-btn" onclick="showSection('package-section')">← Back</button>
         <h2 class="section-title">⚙️ My Settings</h2>
         <p class="section-sub">Account info and preferences</p>
 
-        <div class="settings-card">
-          <div class="settings-card-title">👤 Account</div>
-          <div class="settings-row"><span class="settings-label">Email</span><span class="settings-value" id="settings-email">—</span></div>
-          <div class="settings-row"><span class="settings-label">Role</span><span class="settings-value" id="settings-role">—</span></div>
-          <div class="settings-row"><span class="settings-label">Session expires</span><span class="settings-value" id="settings-session">—</span></div>
-          <div class="settings-row"><span class="settings-label">Submissions (24h)</span><span class="settings-value" id="settings-submissions">0</span></div>
-        </div>
+        <div class="settings-grid">
 
-        <div class="settings-card">
-          <div class="settings-card-title">🔔 Notifications</div>
-          <div class="settings-row">
-            <span class="settings-label">Push status</span>
-            <span class="settings-value" id="settings-notif-status">⚪ Not enabled</span>
-          </div>
-          <div class="notif-actions">
-            <button id="settings-notif-btn" class="btn btn-secondary settings-btn" onclick="requestNotificationPermission()">🔔 Enable</button>
-            <button class="btn btn-secondary settings-btn" onclick="sendTestNotification()">🧪 Test</button>
-          </div>
-        </div>
+          <div class="settings-col">
+            <div class="settings-card">
+              <div class="settings-card-title">👤 Account</div>
+              <div class="settings-row"><span class="settings-label">Email</span><span class="settings-value" id="settings-email">—</span></div>
+              <div class="settings-row"><span class="settings-label">Role</span><span class="settings-value" id="settings-role">—</span></div>
+              <div class="settings-row"><span class="settings-label">Session expires</span><span class="settings-value" id="settings-session">—</span></div>
+              <div class="settings-row"><span class="settings-label">Submissions (24h)</span><span class="settings-value" id="settings-submissions">0</span></div>
+            </div>
 
-        <div class="settings-card">
-          <div class="settings-card-title">🎛️ Preferences</div>
-          <div class="settings-row settings-row-stacked"><span class="settings-label">Default Package</span>
-            <select id="pref-default-package" class="settings-select"><option value="">None</option><option value="P4">Package 4</option><option value="P5">Package 5</option><option value="P6">Package 6</option></select>
+            <div class="settings-card">
+              <div class="settings-card-title">🔔 Notifications</div>
+              <div class="settings-row">
+                <span class="settings-label">Push status</span>
+                <span class="settings-value" id="settings-notif-status">⚪ Not enabled</span>
+              </div>
+              <div class="notif-actions">
+                <button id="settings-notif-btn" class="btn btn-secondary settings-btn" onclick="requestNotificationPermission()">🔔 Enable</button>
+                <button class="btn btn-secondary settings-btn" onclick="sendTestNotification()">🧪 Test</button>
+              </div>
+            </div>
           </div>
-          <div class="settings-row settings-row-stacked"><span class="settings-label">App Theme</span>
-            <select id="pref-theme" class="settings-select"><option value="default">Default (Light)</option><option value="dark">Dark Mode</option><option value="compact">Compact</option></select>
+
+          <div class="settings-col">
+            <div class="settings-card">
+              <div class="settings-card-title">🎛️ Preferences</div>
+              <div class="settings-row settings-row-stacked"><span class="settings-label">Default Package</span>
+                <select id="pref-default-package" class="settings-select"><option value="">None</option><option value="P4">Package 4</option><option value="P5">Package 5</option><option value="P6">Package 6</option></select>
+              </div>
+              <div class="settings-row settings-row-stacked"><span class="settings-label">App Theme</span>
+                <select id="pref-theme" class="settings-select"><option value="default">Default (Light)</option><option value="dark">Dark Mode</option><option value="compact">Compact</option></select>
+              </div>
+            </div>
+
+            <div class="settings-card settings-card-danger">
+              <div class="settings-card-title">⚠️ Data</div>
+              <p style="font-size:.85rem;color:#888;margin-bottom:14px;">Clears local submission history only. Server data is not affected.</p>
+              <button class="btn btn-secondary settings-btn" onclick="clearSessionHistory()">🗑 Clear Local History</button>
+            </div>
+
+            <div class="settings-save-row">
+              <button class="btn btn-primary" onclick="saveUserSettings()">💾 Save Settings</button>
+              <button class="btn btn-secondary mobile-only" onclick="logout()">Sign Out</button>
+            </div>
           </div>
-        </div>
 
-        <div class="settings-card settings-card-danger">
-          <div class="settings-card-title">⚠️ Data</div>
-          <p style="font-size:.85rem;color:#888;margin-bottom:14px;">Clears local submission history only. Server data is not affected.</p>
-          <button class="btn btn-secondary settings-btn" onclick="clearSessionHistory()">Clear Local History</button>
-        </div>
-
-        <div class="btn-group" style="margin-top:6px;">
-          <button class="btn btn-primary" onclick="saveUserSettings()">💾 Save Settings</button>
-          <button class="btn btn-secondary mobile-only" onclick="logout()">Sign Out</button>
-        </div>
+        </div><!-- /settings-grid -->
       </div>
     </div>
 
