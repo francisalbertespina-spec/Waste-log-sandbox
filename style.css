@@ -415,17 +415,18 @@ body.theme-dark .settings-card-danger { background:#281810; border-color:#5a2a14
 .admin-table tr:last-child td { border-bottom:none; }
 .admin-table tr:hover { background:var(--bg2); }
 
-.admin-select { width:100%; max-width:130px; padding:6px 10px; border:2px solid #d0d0d0; border-radius:7px; font-size:0.84rem; font-weight:600; background:white; cursor:pointer; transition:all 0.2s; appearance:none; background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat:no-repeat; background-position:right 6px center; background-size:14px; padding-right:28px; }
+.admin-select { width:100%; max-width:110px; padding:5px 8px 5px 8px; border:2px solid #d0d0d0; border-radius:7px; font-size:0.8rem; font-weight:600; background:white; cursor:pointer; transition:all 0.2s; appearance:none; background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat:no-repeat; background-position:right 5px center; background-size:12px; padding-right:22px; }
 .admin-select:hover { border-color:var(--primary); }
 .admin-select:focus { outline:none; border-color:var(--primary); }
 .admin-select:disabled { opacity:0.55; cursor:not-allowed; }
 .admin-select.loading { opacity:0.55; pointer-events:none; }
-.status-select[value="Approved"] { color:#2e7d32; border-color:#4caf50; background-color:#f1f8f4; }
-.status-select[value="Rejected"] { color:#c62828; border-color:#f44336; background-color:#fff5f5; }
-.status-select[value="Pending"]  { color:#f57c00; border-color:#ff9800; background-color:#fffaf0; }
-.role-select[value="admin"]       { color:var(--primary); border-color:var(--primary); background-color:#fffbf0; }
+/* Status select — color reflects currently selected value */
+.status-select[value="Approved"] { color:#2e7d32; border-color:#81c784; background-color:#f1f8f4; }
+.status-select[value="Rejected"] { color:#c62828; border-color:#e57373; background-color:#fff5f5; }
+.status-select[value="Pending"]  { color:#e65100; border-color:#ffb74d; background-color:#fffaf0; }
+.role-select[value="admin"]       { color:#c17900; border-color:#ffb300; background-color:#fffbf0; }
 .role-select[value="super_admin"] { color:#c62828; border-color:#c62828; background-color:#fff5f5; }
-.role-select[value="user"]        { color:#1976d2; border-color:#1976d2; background-color:#f0f7ff; }
+.role-select[value="user"]        { color:#1976d2; border-color:#64b5f6; background-color:#f0f7ff; }
 .action-cell { display:flex; gap:5px; justify-content:center; align-items:center; flex-wrap:wrap; width:100%; }
 .btn-action { padding:7px 11px; border:none; border-radius:7px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
 .btn-action:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(0,0,0,0.18); }
@@ -881,13 +882,14 @@ td a.photo-link { color:#2563eb; cursor:pointer; text-decoration:underline; }
   .admin-table th:nth-child(4), .admin-table td:nth-child(4) { width: 24%; vertical-align: middle; }
   .admin-table td { vertical-align: middle; padding: 10px 10px; }
   .admin-table th { padding: 12px 10px; }
-  .admin-select { max-width: 100%; width: 100%; }
+  .admin-select { max-width: 100%; width: 100%; font-size: 0.8rem; }
 
   /* ── Analytics chart taller ── */
   .chart-wrap { height: 280px; }
 
-  /* ── Settings wider ── */
-  .settings-card { max-width: 700px; }
+  /* ── Settings — constrain width to remove excess whitespace ── */
+  #user-settings-section .section-card-wrap { max-width: 520px; }
+  .settings-card { max-width: 100%; }
   .settings-value { max-width: 70%; }
 
   /* ── Admin dashboard grid ── */
@@ -913,3 +915,8 @@ td a.photo-link { color:#2563eb; cursor:pointer; text-decoration:underline; }
   .analytics-filters { grid-template-columns: repeat(5, 1fr); }
   .kpi-grid { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* ── Request log table — 2-column layout fix ── */
+.request-log-table { table-layout: fixed; }
+.request-log-table th:nth-child(1), .request-log-table td:nth-child(1) { width: 55%; text-align: left; }
+.request-log-table th:nth-child(2), .request-log-table td:nth-child(2) { width: 45%; text-align: left; vertical-align: middle; }

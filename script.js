@@ -519,7 +519,15 @@ function renderUsers(users) {
 }
 
 function applyDropdownStyling() {
-  document.querySelectorAll('.status-select,.role-select').forEach(s=>s.setAttribute('value',s.value));
+  document.querySelectorAll('.status-select,.role-select').forEach(s => {
+    s.setAttribute('value', s.value);
+    // Color individual <option> elements
+    s.querySelectorAll('option').forEach(o => {
+      if (o.value === 'Approved')     { o.style.background='#e8f5e9'; o.style.color='#2e7d32'; }
+      else if (o.value === 'Pending') { o.style.background='#fff8e1'; o.style.color='#e65100'; }
+      else if (o.value === 'Rejected'){ o.style.background='#ffebee'; o.style.color='#c62828'; }
+    });
+  });
 }
 
 async function quickApprove(email) {
@@ -557,7 +565,7 @@ async function loadRequests() {
       } else {
         list.forEach(req => {
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td style="text-align:left;">${req.id}</td><td>${new Date(req.time).toLocaleString()}</td>`;
+          tr.innerHTML = `<td style="text-align:left;word-break:break-all;">${req.id}</td><td style="text-align:left;">${new Date(req.time).toLocaleString()}</td>`;
           tb.appendChild(tr);
         });
       }
@@ -1566,18 +1574,36 @@ window.onload=async function(){
   if(DEV_MODE){localStorage.setItem("userToken","DEV_TOKEN");document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('package-section').classList.add('active');showToast('Dev mode','info');return;}
   const token=localStorage.getItem('userToken'),email=localStorage.getItem('userEmail'),role=localStorage.getItem('userRole');
   if(token&&email){
+    // ── Immediately show the app shell so it doesn't look frozen ──
+    const prefs=JSON.parse(localStorage.getItem('userPrefs')||'{}');
+    applyTheme(prefs.theme||'default');
+    displayUserInfo(email.split('@')[0],role||'user');
+    if(role==='admin'||role==='super_admin') enableAdminUI();
+    showSidebarForLoggedInUser();
+    // Show a "Resuming session…" overlay on the login section
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    const loginSec=document.getElementById('login-section');
+    if(loginSec) loginSec.classList.add('active');
+    const bDiv=document.getElementById('buttonDiv'), lUI=document.getElementById('loginLoadingUI');
+    if(bDiv) bDiv.style.display='none';
+    if(lUI){ lUI.style.display='flex'; lUI.querySelector('p').textContent='Resuming session…'; }
+    // Now do the async validation in the background
     const valid=await validateSession();
     if(valid){
-      const prefs=JSON.parse(localStorage.getItem('userPrefs')||'{}');
-      if(prefs.defaultPackage)selectedPackage=prefs.defaultPackage;
-      applyTheme(prefs.theme||'default');
-      displayUserInfo(email.split('@')[0],role||'user');
-      showSection('package-section');
-      if(role==='admin'||role==='super_admin'){enableAdminUI();initNotifications();}
+      if(prefs.defaultPackage) selectedPackage=prefs.defaultPackage;
+      if(role==='admin'||role==='super_admin') initNotifications();
       startSessionMonitoring();
+      showSection('package-section');
       showToast(`Welcome back! ${Math.floor(getTimeUntilExpiry()/60)}h left`,'success');
       return;
     }
+    // Session invalid — reset the login UI
+    if(bDiv) bDiv.style.display='flex';
+    if(lUI) lUI.style.display='none';
+    document.body.classList.remove('is-admin');
+    hideSidebarForLoggedOutUser();
+    const ui=document.getElementById('user-info'); if(ui) ui.style.display='none';
+    return;
   }
   if(window.google?.accounts?.id){
     google.accounts.id.initialize({client_id:"648943267004-cgsr4bhegtmma2jmlsekjtt494j8cl7f.apps.googleusercontent.com",callback:handleCredentialResponse,auto_select:false,cancel_on_tap_outside:true});
