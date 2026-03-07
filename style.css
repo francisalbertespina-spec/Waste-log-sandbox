@@ -1148,6 +1148,12 @@ td a.photo-link:hover { background: rgba(211,47,47,0.15); }
   /* ── Admin dashboard grid ── */
   .admin-menu-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .admin-menu-card { padding: 28px 18px; }
+  .admin-menu-grid > *:last-child:nth-child(odd) {
+    grid-column: unset;
+    max-width: unset;
+    margin: unset;
+    width: unset;
+  }
 
   /* ── User management filter ── */
   .user-filter-bar { flex-wrap: nowrap; }
