@@ -218,7 +218,7 @@ All protected endpoints require a `token` query parameter obtained at login.
 
 The app is a static SPA deployable to any host (GitHub Pages, Netlify, Vercel, etc.). The backend is a Google Apps Script Web App — no server infrastructure required.
 
-[Live URL: https://francisalbertespina-spec.github.io/Waste-log-sandbox/](https://francisalbertespina-spec.github.io/Waste-log-sandbox/)
+Live URL: [https://francisalbertespina-spec.github.io/Waste-log-sandbox/](https://francisalbertespina-spec.github.io/Waste-log-sandbox/)
 
 ---
 
