@@ -761,6 +761,11 @@ td a.photo-link:hover { background: rgba(211,47,47,0.15); }
 ═══════════════════════════════════════════════════════ */
 @media (min-width: 900px) {
 
+  #login-section .section-title,
+  #login-section .section-sub{
+  text-align:center;
+  }
+
   /* ── Body & outer shell ── */
   body {
     padding: 0;
