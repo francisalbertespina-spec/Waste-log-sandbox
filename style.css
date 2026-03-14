@@ -228,6 +228,15 @@ body.is-admin .mode-toggle.admin-only   { display: flex !important; }
 body.is-admin .notif-bell.admin-only    { display: flex !important; }
 body.is-admin .section.admin-only.active { display: block !important; }
 
+/* ── Pre-login: sidebar hidden, full-width layout ── */
+body.pre-login .desktop-sidebar { display: none !important; }
+body.pre-login .app-container {
+  grid-template-columns: 1fr !important;
+  grid-template-areas:
+    "header"
+    "content" !important;
+}
+
 /* Mode toggle */
 .mode-toggle { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.15); padding:7px 14px; border-radius:22px; backdrop-filter:blur(10px); border: 1px solid rgba(255,255,255,0.12); }
 .mode-label  { font-size:0.82rem; font-weight:600; color:rgba(255,255,255,0.6); transition:all 0.3s; user-select:none; }
@@ -764,6 +773,30 @@ td a.photo-link:hover { background: rgba(211,47,47,0.15); }
   #login-section .section-title,
   #login-section .section-sub{
   text-align:center;
+  }
+
+  /* ── Login: centered card on full-width content area ── */
+  body.pre-login .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - var(--header-h));
+    padding: 28px;
+  }
+
+  body.pre-login #login-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  body.pre-login #login-section .section-card-wrap {
+    max-width: 460px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-xl);
+    padding: 48px 44px;
   }
 
   /* ── Body & outer shell ── */

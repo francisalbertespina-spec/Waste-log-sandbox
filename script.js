@@ -1690,20 +1690,30 @@ function isDesktop() { return window.innerWidth >= DESKTOP_BP; }
 function initDesktopLayout() {
   const sidebar = document.getElementById('desktop-sidebar');
   if (!sidebar) return;
-  if (isDesktop()) {
+  // Only show sidebar shell on desktop IF the user is already logged in
+  // (pre-login class on body hides it via CSS when not yet authenticated)
+  if (isDesktop() && !document.body.classList.contains('pre-login')) {
     sidebar.style.display = 'flex';
     sidebar.style.flexDirection = 'column';
-  } else {
+  } else if (!isDesktop()) {
     sidebar.style.display = 'none';
   }
 }
 
 /* ── Reveal nav + footer after login ── */
 function showSidebarForLoggedInUser() {
-  const nav    = document.getElementById('sb-nav');
-  const footer = document.getElementById('sb-footer');
+  const nav     = document.getElementById('sb-nav');
+  const footer  = document.getElementById('sb-footer');
+  const sidebar = document.getElementById('desktop-sidebar');
   if (nav)    nav.style.display    = 'flex';
   if (footer) footer.style.display = 'flex';
+  // Remove pre-login class → sidebar becomes visible on desktop
+  document.body.classList.remove('pre-login');
+  // Also ensure the sidebar shell is shown on desktop
+  if (sidebar && isDesktop()) {
+    sidebar.style.display = 'flex';
+    sidebar.style.flexDirection = 'column';
+  }
 }
 
 /* ── Hide nav + footer on logout ── */
@@ -1712,6 +1722,8 @@ function hideSidebarForLoggedOutUser() {
   const footer = document.getElementById('sb-footer');
   if (nav)    nav.style.display    = 'none';
   if (footer) footer.style.display = 'none';
+  // Re-add pre-login class → sidebar hidden again on desktop
+  document.body.classList.add('pre-login');
 }
 
 /* ── Intercept showSection to update active state ── */
