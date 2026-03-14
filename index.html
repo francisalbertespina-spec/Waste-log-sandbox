@@ -461,14 +461,13 @@
 
     <!-- ═══ ANALYTICS ═══ -->
     <div id="analytics-section" class="section admin-only has-page-header">
-      <button class="back-btn" onclick="backToAdminDashboard()">← Admin Dashboard</button>
       <div class="section-page-header">
         <div class="section-page-header-text">
           <div class="section-page-header-title">Waste Analytics</div>
           <div class="section-page-header-sub">Visualize trends and export reports</div>
         </div>
         <div class="section-page-header-actions">
-          <button class="btn btn-secondary" onclick="backToAdminDashboard()" style="height:36px;font-size:0.82rem;">← Dashboard</button>
+          <button class="btn btn-secondary" onclick="backToAdminDashboard()" style="height:36px;font-size:0.82rem;">← Admin Dashboard</button>
         </div>
       </div>
       <div class="breadcrumb"><span class="breadcrumb-item" onclick="backToAdminDashboard()">Admin</span><span class="breadcrumb-sep">›</span><span class="breadcrumb-item active">Analytics</span></div>
@@ -520,7 +519,6 @@
 
     <!-- ═══ USER MANAGEMENT ═══ -->
     <div id="user-management-section" class="section admin-only has-page-header">
-      <button class="back-btn" onclick="backToAdminDashboard()">← Admin Dashboard</button>
       <div class="section-page-header">
         <div class="section-page-header-text">
           <div class="section-page-header-title">User Management</div>
@@ -534,7 +532,7 @@
       <div class="admin-card">
         <div class="admin-header"><h2>👥 User Management</h2><p>Manage user access and roles</p></div>
         <div class="admin-block">
-          <div class="admin-block-header"><h3>All Users</h3><button class="btn btn-sm" onclick="loadUsers()">↻ Refresh</button></div>
+          <div class="admin-block-header"><h3>All Users</h3></div>
           <div class="user-filter-bar">
             <div class="user-filter-search">
               <span class="filter-icon">🔍</span>
@@ -566,7 +564,6 @@
 
     <!-- ═══ REQUEST LOGS ═══ -->
     <div id="request-logs-section" class="section admin-only has-page-header">
-      <button class="back-btn" onclick="backToAdminDashboard()">← Admin Dashboard</button>
       <div class="section-page-header">
         <div class="section-page-header-text">
           <div class="section-page-header-title">Request Logs</div>
@@ -580,7 +577,7 @@
       <div class="admin-card">
         <div class="admin-header"><h2>📝 Request Logs</h2><p>System activity history</p></div>
         <div class="admin-block">
-          <div class="admin-block-header"><h3>Recent Requests</h3><button class="btn btn-sm" onclick="loadRequests()">Refresh</button></div>
+          <div class="admin-block-header"><h3>Recent Requests</h3></div>
           <table class="admin-table request-log-table"><thead><tr><th>Request ID</th><th>Time</th></tr></thead><tbody id="requestsTableBody"></tbody></table>
         </div>
       </div>
