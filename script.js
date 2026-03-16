@@ -15,6 +15,75 @@ let submissionFingerprints = new Map();
 const FINGERPRINT_LOCK_DURATION = 120000;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// IN-APP CONFIRM / ALERT  (replaces native confirm() and alert())
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _wmsConfirmResolve = null;
+
+function wmsConfirmResolve(result) {
+  const modal = document.getElementById('wms-confirm-modal');
+  if (modal) modal.style.display = 'none';
+  if (_wmsConfirmResolve) { _wmsConfirmResolve(result); _wmsConfirmResolve = null; }
+}
+
+function wmsConfirm({ title = 'Are you sure?', msg = '', icon = '⚠️', okText = 'Confirm', okDanger = true } = {}) {
+  return new Promise(resolve => {
+    _wmsConfirmResolve = resolve;
+    document.getElementById('wms-confirm-title').textContent = title;
+    document.getElementById('wms-confirm-msg').textContent   = msg;
+    document.getElementById('wms-confirm-icon').textContent  = icon;
+    const okBtn = document.getElementById('wms-confirm-ok');
+    okBtn.textContent = okText;
+    okBtn.className   = `btn ${okDanger ? 'btn-primary' : 'btn-primary'}`;
+    const modal = document.getElementById('wms-confirm-modal');
+    if (modal) modal.style.display = 'flex';
+  });
+}
+
+function wmsAlert({ title = 'Notice', msg = '', icon = 'ℹ️' } = {}) {
+  return new Promise(resolve => {
+    _wmsConfirmResolve = resolve;
+    document.getElementById('wms-confirm-title').textContent = title;
+    document.getElementById('wms-confirm-msg').textContent   = msg;
+    document.getElementById('wms-confirm-icon').textContent  = icon;
+    document.getElementById('wms-confirm-ok').textContent    = 'OK';
+    document.getElementById('wms-confirm-cancel').style.display = 'none';
+    const modal = document.getElementById('wms-confirm-modal');
+    if (modal) modal.style.display = 'flex';
+  }).finally(() => {
+    const cancelBtn = document.getElementById('wms-confirm-cancel');
+    if (cancelBtn) cancelBtn.style.display = '';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPLASH SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+
+function hideSplash() {
+  const splash = document.getElementById('wms-splash');
+  if (splash) {
+    splash.classList.add('hidden');
+    setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 450);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OFFLINE BANNER
+// ═══════════════════════════════════════════════════════════════════════════
+
+function initOfflineBanner() {
+  const banner = document.getElementById('wms-offline-banner');
+  if (!banner) return;
+  const update = () => {
+    banner.style.display = navigator.onLine ? 'none' : 'block';
+  };
+  update();
+  window.addEventListener('online',  () => { update(); showToast('Back online!', 'success'); });
+  window.addEventListener('offline', () => { update(); showToast('You are offline', 'error', { duration: 4000 }); });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // 1. PUSH NOTIFICATION ENGINE  (admin-only)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -29,7 +98,7 @@ async function initNotifications() {
   try {
     swRegistration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
     navigator.serviceWorker.addEventListener('message', handleSwMessage);
-  } catch (err) { console.warn('[NOTIF] SW reg failed:', err); }
+  } catch (err) { if(DEV_MODE) console.warn('[NOTIF] SW reg failed:', err); }
   updateNotifUI();
   if (notifPermission === 'granted') startNotifPolling();
 }
@@ -77,7 +146,7 @@ async function checkPendingUsers(forceNotify = false) {
       fireAdminNotification(count, diff > 0 ? diff : count, pending);
     }
     lastKnownPendingCount = count;
-  } catch (err) { console.error('[NOTIF] poll error:', err); }
+  } catch (err) { if(DEV_MODE) console.error('[NOTIF] poll error:', err); }
 }
 
 function fireAdminNotification(total, newCount, pendingUsers) {
@@ -274,8 +343,11 @@ function generateRequestId(fp) { return `${fp}-${new Date().toISOString().split(
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function stampImageWithWatermark(file, email, pkg) {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) { alert("GPS not supported"); return reject("No GPS"); }
+  return new Promise(async (resolve, reject) => {
+    if (!navigator.geolocation) {
+      await wmsAlert({ title: 'GPS Not Supported', msg: 'Your device does not support GPS location.', icon: '📍' });
+      return reject("No GPS");
+    }
     navigator.geolocation.getCurrentPosition(pos => {
       const lat = pos.coords.latitude, lng = pos.coords.longitude;
       const img = new Image(), reader = new FileReader();
@@ -297,7 +369,10 @@ async function stampImageWithWatermark(file, email, pkg) {
         img.src = reader.result;
       };
       reader.readAsDataURL(file);
-    }, err => { alert("GPS required."); reject(err); }, {enableHighAccuracy:true,timeout:10000});
+    }, async err => {
+      await wmsAlert({ title: 'GPS Required', msg: 'Location access is required to stamp photos. Please allow location and try again.', icon: '📍' });
+      reject(err);
+    }, {enableHighAccuracy:true,timeout:10000});
   });
 }
 
@@ -415,8 +490,14 @@ function applyTheme(t) {
   if (t==='compact') document.body.classList.add('theme-compact');
 }
 
-function clearSessionHistory() {
-  if (!confirm('Clear local submission history?\nServer data is not affected.')) return;
+async function clearSessionHistory() {
+  const ok = await wmsConfirm({
+    title: 'Clear Local History?',
+    msg: 'This removes local submission records only. Server data is not affected.',
+    icon: '🗑️',
+    okText: 'Clear'
+  });
+  if (!ok) return;
   localStorage.removeItem('completedSubmissions');
   showToast('Local history cleared','success');
   renderUserSettings();
@@ -542,7 +623,13 @@ async function updateUserRole(email,role) {
   try { const sel=event?.target; if(sel){sel.classList.add('loading');sel.disabled=true;} const r=await authenticatedFetch(`${scriptURL}?action=updateUserRole&email=${encodeURIComponent(email)}&role=${role}`); const d=await r.json(); if(sel){sel.classList.remove('loading');sel.disabled=false;} if(d.success||d.status==='success'){showToast(`Role → ${role}`,'success');await loadUsers();}else{showToast(d.message||'Failed','error');await loadUsers();} } catch(e){showToast(e.message,'error');await loadUsers();}
 }
 async function deleteUser(email) {
-  if(!confirm(`Delete ${email}?\nCannot be undone.`))return;
+  const ok = await wmsConfirm({
+    title: 'Delete User?',
+    msg: `Remove ${email} permanently? This cannot be undone.`,
+    icon: '🗑️',
+    okText: 'Delete'
+  });
+  if (!ok) return;
   try { const r=await authenticatedFetch(`${scriptURL}?action=deleteUser&email=${encodeURIComponent(email)}`); const d=await r.json(); if(d.success||d.status==='success'){showToast('Deleted','success');loadUsers();}else showToast(d.message||'Failed','error'); } catch{showToast('Error deleting','error');}
 }
 async function loadRequests() {
@@ -664,7 +751,7 @@ async function loadAnalytics() {
   } catch (err) {
     document.getElementById('analytics-loading').style.display = 'none';
     showToast('Error loading analytics', 'error');
-    console.error(err);
+    if(DEV_MODE) console.error(err);
   }
 }
 
@@ -906,7 +993,7 @@ async function generateAnalyticsPDF() {
     showToast('Analytics PDF exported!', 'success');
 
   } catch (err) {
-    console.error(err);
+    if(DEV_MODE) console.error(err);
     document.querySelectorAll('.toast').forEach(t => t.remove());
     activeToast = null;
     toastQueue.length = 0;
@@ -1077,7 +1164,7 @@ async function loadHistory(type) {
       // r[7] = sheet row index appended by backend (r[6] is system timestamp; row index is at index 7)
       // If backend doesn't supply it, we cannot reliably delete/edit — show warning once
       const rowIndex = (r[7] !== undefined && r[7] !== null && !isNaN(Number(r[7]))) ? Number(r[7]) : null;
-      if(rowIndex === null && idx === 0) console.warn('[WMS] Row index missing from backend — update Code.gs fetchEntries to include row index');
+      if(rowIndex === null && idx === 0) if(DEV_MODE) console.warn('[WMS] Row index missing from backend — update Code.gs fetchEntries to include row index');
       window._entryRowCache[rowIndex] = { type, date: r[0], valueField: r[1], waste: r[2] };
       const date=new Date(r[0]).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"});
       let img=''; if(r[5]){const m=r[5].match(/\/d\/([^/]+)/);img=m?`https://drive.google.com/uc?export=view&id=${m[1]}`:r[5];}
@@ -1105,7 +1192,7 @@ async function loadHistory(type) {
       }
       tb.appendChild(tr);
     });
-  } catch(err){document.getElementById(`${type}-loading`).style.display='none';showToast('Error loading data','error');console.error(err);}
+  } catch(err){document.getElementById(`${type}-loading`).style.display='none';showToast('Error loading data','error');if(DEV_MODE) console.error(err);}
 }
 
 // ── Entry edit modal ─────────────────────────────────────────────────────────
@@ -1171,7 +1258,13 @@ async function saveEditEntry() {
 }
 
 async function deleteEntry(type, rowIndex) {
-  if(!confirm('Delete this entry?\nThis cannot be undone.'))return;
+  const ok = await wmsConfirm({
+    title: 'Delete Entry?',
+    msg: 'This entry will be permanently removed from the server. This cannot be undone.',
+    icon: '🗑️',
+    okText: 'Delete'
+  });
+  if (!ok) return;
   try {
     const url=`${scriptURL}?action=deleteEntry&package=${selectedPackage}&wasteType=${type}&rowIndex=${rowIndex}`;
     const res=await authenticatedFetch(url);
@@ -1198,7 +1291,7 @@ async function exportExcel(type) {
     const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Records");
     XLSX.writeFile(wb,`${type}_waste_${selectedPackage}_${new Date().toISOString().split('T')[0]}.xlsx`);
     showToast("Excel exported!","success");
-  }catch(e){console.error(e);showToast("Export failed","error");}
+  }catch(e){if(DEV_MODE) console.error(e);showToast("Export failed","error");}
   finally{btn.disabled=false;btn.textContent="Export Excel";}
 }
 
@@ -1266,7 +1359,7 @@ async function fetchImageViaProxy(fileId) {
     }
     if (!res.ok) return null;
     const data = await res.json();
-    if (data.error) { console.warn('[PDF] Proxy error:', data.error); return null; }
+    if (data.error) { if(DEV_MODE) console.warn('[PDF] Proxy error:', data.error); return null; }
     if (data.base64 && data.mimeType) {
       return {
         dataUrl: `data:${data.mimeType};base64,${data.base64}`,
@@ -1276,7 +1369,7 @@ async function fetchImageViaProxy(fileId) {
     }
     return null;
   } catch (err) {
-    console.warn('[PDF] fetchImageViaProxy failed:', err.message);
+    if(DEV_MODE) console.warn('[PDF] fetchImageViaProxy failed:', err.message);
     return null;
   }
 }
@@ -1521,7 +1614,7 @@ async function generatePDFReport(type) {
     showToast('PDF generated!', 'success');
 
   } catch (e) {
-    console.error(e);
+    if(DEV_MODE) console.error(e);
     document.querySelectorAll('.toast').forEach(t => t.remove());
     activeToast = null;
     toastQueue.length = 0;
@@ -1660,31 +1753,41 @@ async function handleCredentialResponse(response){
       if(data.role==="admin"||data.role==="super_admin"){enableAdminUI();initNotifications();}
     }else if(data.status==="Rejected"){showToast("Access denied","error");}
     else{showToast("Awaiting admin approval","info");}
-  }catch(e){console.error(e);setLoginLoading(false);showToast("Connection error","error");}
+  }catch(e){if(DEV_MODE) console.error(e);setLoginLoading(false);showToast("Connection error","error");}
 }
 
 window.onload=async function(){
-  if(DEV_MODE){localStorage.setItem("userToken","DEV_TOKEN");document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('package-section').classList.add('active');showToast('Dev mode','info');return;}
+  // Init offline banner immediately
+  initOfflineBanner();
+
+  if(DEV_MODE){
+    hideSplash();
+    localStorage.setItem("userToken","DEV_TOKEN");
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('package-section').classList.add('active');
+    showToast('Dev mode','info');
+    return;
+  }
+
   const token=localStorage.getItem('userToken'),email=localStorage.getItem('userEmail'),role=localStorage.getItem('userRole');
   if(token&&email){
     const prefs=JSON.parse(localStorage.getItem('userPrefs')||'{}');
     applyTheme(prefs.theme||'default');
-    // ── Keep user-info and sidebar HIDDEN until validation completes ──
+    // Keep user-info and sidebar HIDDEN until validation completes
     const ui=document.getElementById('user-info'); if(ui) ui.style.display='none';
     const sidebar=document.getElementById('desktop-sidebar'); if(sidebar) sidebar.style.display='none';
     const tabBar=document.getElementById('mobile-tab-bar'); if(tabBar) tabBar.style.display='none';
     document.body.classList.remove('is-admin');
-    // Show "Resuming session…" on the login screen while we validate
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     const loginSec=document.getElementById('login-section');
     if(loginSec) loginSec.classList.add('active');
     const bDiv=document.getElementById('buttonDiv'), lUI=document.getElementById('loginLoadingUI');
     if(bDiv) bDiv.style.display='none';
     if(lUI){ lUI.style.display='flex'; lUI.querySelector('p').textContent='Resuming session…'; }
-    // Validate token in background
+    // Validate token — hide splash only after we know what to show
     const valid=await validateSession();
+    hideSplash();
     if(valid){
-      // Only NOW reveal user info and sidebar
       if(prefs.defaultPackage) selectedPackage=prefs.defaultPackage;
       displayUserInfo(email.split('@')[0],role||'user');
       if(role==='admin'||role==='super_admin') enableAdminUI();
@@ -1693,6 +1796,7 @@ window.onload=async function(){
       showSidebarForLoggedInUser();
       showSection('package-section');
       showToast(`Welcome back! ${Math.floor(getTimeUntilExpiry()/60)}h left`,'success');
+      initPullToRefresh();
       return;
     }
     // Session invalid — reset to clean login UI
@@ -1701,10 +1805,20 @@ window.onload=async function(){
     hideSidebarForLoggedOutUser();
     return;
   }
+
+  // No stored session — show login
+  hideSplash();
   if(window.google?.accounts?.id){
     google.accounts.id.initialize({client_id:"648943267004-cgsr4bhegtmma2jmlsekjtt494j8cl7f.apps.googleusercontent.com",callback:handleCredentialResponse,auto_select:false,cancel_on_tap_outside:true});
     google.accounts.id.renderButton(document.getElementById("buttonDiv"),{theme:"outline",size:"large",width:"250"});
   }else{showToast('Login service unavailable','error');}
+
+  // Register service worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => { if(DEV_MODE) console.log('[SW] Registered', reg); })
+      .catch(err => { if(DEV_MODE) console.warn('[SW] Registration failed', err); });
+  }
 };
 
 function openImageModal(url){const m=url.match(/[-\w]{25,}/);if(!m){showToast("Invalid link","error");return;}document.getElementById("modalImage").src=`https://drive.google.com/thumbnail?id=${m[0]}&sz=w1200`;document.getElementById("imageModal").style.display="flex";}
@@ -2057,3 +2171,58 @@ window.showSection = function(id) {
     updateSidebarPackagePill(null, null);
   }
 };
+// ═══════════════════════════════════════════════════════════════════════════
+// PULL-TO-REFRESH  (mobile only)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function initPullToRefresh() {
+  const content = document.querySelector('.content');
+  if (!content || window.innerWidth >= 900) return;
+
+  let startY = 0, pulling = false, indicator = null;
+
+  function getIndicator() {
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'ptr-indicator';
+      indicator.style.cssText = [
+        'position:fixed','top:0','left:0','right:0',
+        'height:0','background:var(--primary-lt)',
+        'display:flex','align-items:center','justify-content:center',
+        'overflow:hidden','transition:height 0.2s','z-index:998',
+        'font-size:0.78rem','font-weight:600','color:var(--primary)',
+        'pointer-events:none'
+      ].join(';');
+      document.body.appendChild(indicator);
+    }
+    return indicator;
+  }
+
+  content.addEventListener('touchstart', e => {
+    if (content.scrollTop === 0) { startY = e.touches[0].clientY; pulling = true; }
+  }, { passive: true });
+
+  content.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    const dist = Math.min(e.touches[0].clientY - startY, 72);
+    if (dist > 0) {
+      getIndicator().style.height = dist + 'px';
+      getIndicator().textContent = dist > 55 ? '↑ Release to refresh' : '↓ Pull to refresh';
+    }
+  }, { passive: true });
+
+  content.addEventListener('touchend', () => {
+    if (!pulling) return;
+    const ind = getIndicator();
+    const dist = parseInt(ind.style.height) || 0;
+    ind.style.height = '0';
+    pulling = false;
+    if (dist > 55) {
+      // Refresh the currently active records section
+      const active = document.querySelector('.section.active');
+      if (active?.id === 'hazardous-history-section') { showToast('Refreshing…','info',{duration:1200}); loadHistory('hazardous'); }
+      else if (active?.id === 'solid-history-section') { showToast('Refreshing…','info',{duration:1200}); loadHistory('solid'); }
+      else if (active?.id === 'user-management-section') { loadUsers(); }
+    }
+  });
+}

@@ -3,14 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#d32f2f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HDJV WMS">
+  <meta name="description" content="Waste logging and management for HDJV Environmental Management">
   <title>HDJV Waste Management System (WMS)</title>
   <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="style.css" rel="stylesheet" type="text/css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="pre-login">
+
+<!-- ═══ SPLASH SCREEN ═══ -->
+<div id="wms-splash" class="wms-splash">
+  <div class="wms-splash-inner">
+    <img src="logo.png" alt="HDJV WMS" onerror="this.style.display='none'">
+    <div class="wms-splash-title">WMS</div>
+    <div class="wms-splash-sub">HDJV Environmental Management</div>
+    <div class="wms-splash-spinner"></div>
+  </div>
+</div>
+
+<!-- ═══ OFFLINE BANNER ═══ -->
+<div id="wms-offline-banner" class="wms-offline-banner" style="display:none;">
+  <span>📡 You are offline — some features may be unavailable</span>
+</div>
+
 <div class="app-container">
 
   <!-- ═══ DESKTOP SIDEBAR ═══ -->
@@ -206,7 +230,7 @@
         <h2 class="section-title">New Hazardous Entry</h2>
         <div class="form-two-col">
           <div class="form-group" id="hazardous-date-group"><label>Date</label><input type="date" id="hazardous-date"><div class="error-msg">Please select a date</div></div>
-          <div class="form-group" id="hazardous-volume-group"><label>Volume (kg)</label><input type="number" step="0.00001" id="hazardous-volume" placeholder="0.00000"><div class="error-msg">Please enter a volume</div></div>
+          <div class="form-group" id="hazardous-volume-group"><label>Volume (kg)</label><input type="number" step="0.00001" id="hazardous-volume" placeholder="0.00000" inputmode="decimal"><div class="error-msg">Please enter a volume</div></div>
           <div class="form-group" id="hazardous-waste-group">
             <label>Waste Name</label>
             <select id="hazardous-waste">
@@ -251,7 +275,7 @@
           <div class="form-group" id="solid-date-group"><label>Date</label><input type="date" id="solid-date"><div class="error-msg">Please select a date</div></div>
           <div class="form-group" id="solid-location-group">
             <label>Location (Pier Number)</label>
-            <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.1rem;font-weight:600;color:#555;">P-</span><input type="number" id="solid-location" placeholder="462" min="462" max="1260" style="flex:1;"></div>
+            <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.1rem;font-weight:600;color:#555;">P-</span><input type="number" id="solid-location" placeholder="462" min="462" max="1260" inputmode="numeric" style="flex:1;"></div>
             <div class="error-msg">Please enter a pier number (462–1260)</div>
           </div>
           <div class="form-group" id="solid-waste-group"><label>Waste Name</label><select id="solid-waste"><option value="">-- Select Waste Type --</option><option value="Residual">Residual</option><option value="Scrap">Scrap</option></select><div class="error-msg">Please select a waste type</div></div>
@@ -644,6 +668,19 @@
       </div>
     </div>
   </div>
+
+<!-- ═══ IN-APP CONFIRM MODAL (replaces native confirm/alert) ═══ -->
+<div id="wms-confirm-modal" class="wms-confirm-overlay" style="display:none;">
+  <div class="wms-confirm-box">
+    <div class="wms-confirm-icon" id="wms-confirm-icon">⚠️</div>
+    <h3 class="wms-confirm-title" id="wms-confirm-title">Are you sure?</h3>
+    <p class="wms-confirm-msg" id="wms-confirm-msg"></p>
+    <div class="wms-confirm-actions">
+      <button class="btn btn-secondary" id="wms-confirm-cancel" onclick="wmsConfirmResolve(false)">Cancel</button>
+      <button class="btn btn-primary" id="wms-confirm-ok" onclick="wmsConfirmResolve(true)">Confirm</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
