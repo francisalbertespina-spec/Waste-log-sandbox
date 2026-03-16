@@ -1649,22 +1649,27 @@ window.onload=async function(){
   if(DEV_MODE){localStorage.setItem("userToken","DEV_TOKEN");document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('package-section').classList.add('active');showToast('Dev mode','info');return;}
   const token=localStorage.getItem('userToken'),email=localStorage.getItem('userEmail'),role=localStorage.getItem('userRole');
   if(token&&email){
-    // ── Immediately show the app shell so it doesn't look frozen ──
     const prefs=JSON.parse(localStorage.getItem('userPrefs')||'{}');
     applyTheme(prefs.theme||'default');
-    displayUserInfo(email.split('@')[0],role||'user');
-    if(role==='admin'||role==='super_admin') enableAdminUI();
-    // Show a "Resuming session…" overlay on the login section
+    // ── Keep user-info and sidebar HIDDEN until validation completes ──
+    const ui=document.getElementById('user-info'); if(ui) ui.style.display='none';
+    const sidebar=document.getElementById('desktop-sidebar'); if(sidebar) sidebar.style.display='none';
+    const tabBar=document.getElementById('mobile-tab-bar'); if(tabBar) tabBar.style.display='none';
+    document.body.classList.remove('is-admin');
+    // Show "Resuming session…" on the login screen while we validate
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     const loginSec=document.getElementById('login-section');
     if(loginSec) loginSec.classList.add('active');
     const bDiv=document.getElementById('buttonDiv'), lUI=document.getElementById('loginLoadingUI');
     if(bDiv) bDiv.style.display='none';
     if(lUI){ lUI.style.display='flex'; lUI.querySelector('p').textContent='Resuming session…'; }
-    // Now do the async validation in the background
+    // Validate token in background
     const valid=await validateSession();
     if(valid){
+      // Only NOW reveal user info and sidebar
       if(prefs.defaultPackage) selectedPackage=prefs.defaultPackage;
+      displayUserInfo(email.split('@')[0],role||'user');
+      if(role==='admin'||role==='super_admin') enableAdminUI();
       if(role==='admin'||role==='super_admin') initNotifications();
       startSessionMonitoring();
       showSidebarForLoggedInUser();
@@ -1672,12 +1677,10 @@ window.onload=async function(){
       showToast(`Welcome back! ${Math.floor(getTimeUntilExpiry()/60)}h left`,'success');
       return;
     }
-    // Session invalid — reset the login UI
+    // Session invalid — reset to clean login UI
     if(bDiv) bDiv.style.display='flex';
     if(lUI) lUI.style.display='none';
-    document.body.classList.remove('is-admin');
     hideSidebarForLoggedOutUser();
-    const ui=document.getElementById('user-info'); if(ui) ui.style.display='none';
     return;
   }
   if(window.google?.accounts?.id){
@@ -1719,23 +1722,10 @@ function showSidebarForLoggedInUser() {
   if (footer) footer.style.display = 'flex';
   // Remove pre-login class → sidebar becomes visible on desktop
   document.body.classList.remove('pre-login');
-  // Also ensure the sidebar shell is shown on desktop with slide-in animation
+  // Show sidebar shell on desktop instantly (no animation)
   if (sidebar && isDesktop()) {
     sidebar.style.display = 'flex';
     sidebar.style.flexDirection = 'column';
-    sidebar.classList.remove('sidebar-entering');
-    void sidebar.offsetWidth; // force reflow to restart animation
-    sidebar.classList.add('sidebar-entering');
-    // Animate content area too
-    const content = document.querySelector('.content');
-    if (content) {
-      content.classList.remove('content-reveal');
-      void content.offsetWidth;
-      content.classList.add('content-reveal');
-    }
-    // Clean up animation class after it's done
-    setTimeout(() => sidebar.classList.remove('sidebar-entering'), 350);
-    setTimeout(() => content && content.classList.remove('content-reveal'), 500);
   }
   // Show mobile tab bar when logged in
   const tabBar = document.getElementById('mobile-tab-bar');
