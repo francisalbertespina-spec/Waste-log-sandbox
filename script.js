@@ -1123,7 +1123,25 @@ function openEditModal(type, rowIndex) {
   const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
   document.getElementById('edit-date').value = `${yyyy}-${mm}-${dd}`;
   document.getElementById('edit-value').value = row.valueField || '';
-  document.getElementById('edit-waste').value = row.waste || '';
+
+  // Populate waste type dropdown with correct options for the type
+  const wasteSelect = document.getElementById('edit-waste');
+  const hazOptions = [
+    'Used Oil',
+    'Pathological and Infectious Waste',
+    'Lead Compounds',
+    'Oil Contaminated Materials',
+    'Grease Waste',
+    'Waste Electrical and Electronic Equipment',
+    'Mercury and Mercury Compounds',
+    'Containers Previously containing toxic chemical substances'
+  ];
+  const solidOptions = ['Residual', 'Scrap'];
+  const options = isHaz ? hazOptions : solidOptions;
+  wasteSelect.innerHTML = options.map(o =>
+    `<option value="${o}"${o === (row.waste||'') ? ' selected' : ''}>${o}</option>`
+  ).join('');
+
   document.getElementById('entry-edit-modal').style.display='flex';
 }
 
