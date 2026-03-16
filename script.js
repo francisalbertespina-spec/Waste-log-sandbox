@@ -1800,26 +1800,48 @@ window.onload=async function(){
       return;
     }
     // Session invalid — reset to clean login UI
+    hideSplash();
     if(bDiv) bDiv.style.display='flex';
     if(lUI) lUI.style.display='none';
     hideSidebarForLoggedOutUser();
+    initGoogleSignIn();
     return;
   }
 
   // No stored session — show login
   hideSplash();
-  if(window.google?.accounts?.id){
-    google.accounts.id.initialize({client_id:"648943267004-cgsr4bhegtmma2jmlsekjtt494j8cl7f.apps.googleusercontent.com",callback:handleCredentialResponse,auto_select:false,cancel_on_tap_outside:true});
-    google.accounts.id.renderButton(document.getElementById("buttonDiv"),{theme:"outline",size:"large",width:"250"});
-  }else{showToast('Login service unavailable','error');}
+  initGoogleSignIn();
+};
 
-  // Register service worker
-  if('serviceWorker' in navigator){
+// Register SW once, outside onload so it always runs
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => { if(DEV_MODE) console.log('[SW] Registered', reg); })
       .catch(err => { if(DEV_MODE) console.warn('[SW] Registration failed', err); });
+  });
+}
+
+// Initialize Google Sign-In — retries until the GSI script is ready
+function initGoogleSignIn(attempt = 0) {
+  if(window.google?.accounts?.id){
+    google.accounts.id.initialize({
+      client_id: '648943267004-cgsr4bhegtmma2jmlsekjtt494j8cl7f.apps.googleusercontent.com',
+      callback: handleCredentialResponse,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('buttonDiv'),
+      { theme: 'outline', size: 'large', width: '250' }
+    );
+  } else if(attempt < 20) {
+    // GSI script not loaded yet — retry every 250ms (up to 5s total)
+    setTimeout(() => initGoogleSignIn(attempt + 1), 250);
+  } else {
+    showToast('Login service unavailable — check your connection', 'error');
   }
-};
+}
 
 function openImageModal(url){const m=url.match(/[-\w]{25,}/);if(!m){showToast("Invalid link","error");return;}document.getElementById("modalImage").src=`https://drive.google.com/thumbnail?id=${m[0]}&sz=w1200`;document.getElementById("imageModal").style.display="flex";}
 function closeImageModal(){document.getElementById("imageModal").style.display="none";document.getElementById("modalImage").src="";}
