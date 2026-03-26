@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// HDJV WMS — demo.js
+// WMS — demo.js
 // Drop this file into your repo and add <script src="demo.js"></script>
 // BEFORE <script src="script.js"></script> in index.html.
 //
@@ -20,7 +20,7 @@
 
   // ── 1. DEMO CREDENTIALS ────────────────────────────────────────────────
   const DEMO_TOKEN  = 'DEMO_TOKEN_READONLY';
-  const DEMO_EMAIL  = 'demo.viewer@hdjv.com';
+  const DEMO_EMAIL  = 'demo.viewer@emu.com';
   const DEMO_NAME   = 'Demo Viewer';
   const DEMO_ROLE   = 'admin';                         // full feature access
   const DEMO_EXPIRY = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now
@@ -32,7 +32,7 @@
 
   function hazRows(pkg) {
     const wastes = ['Used Oil','Oil Contaminated Materials','Grease Waste','Lead Compounds','Paint Waste'];
-    const users  = ['juan.delacruz@hdjv.com','maria.santos@hdjv.com','pedro.reyes@hdjv.com', DEMO_EMAIL];
+    const users  = ['juan.delacruz@emu.com','maria.santos@emu.com','pedro.reyes@emu.com', DEMO_EMAIL];
     const rows = [];
     for (let i = 0; i < 18; i++) {
       const d = new Date();
@@ -58,7 +58,7 @@
   function solidRows(pkg) {
     const wastes = ['Residual Solid Waste','Scrap Metal','Wood Waste','Concrete Debris','Mixed Construction Waste'];
     const locs   = ['Pier 4-A','Pier 4-B','Pier 5-A','Pier 5-B','Pier 6-A','Staging Area'];
-    const users  = ['juan.delacruz@hdjv.com','maria.santos@hdjv.com','pedro.reyes@hdjv.com', DEMO_EMAIL];
+    const users  = ['juan.delacruz@emu.com','maria.santos@emu.com','pedro.reyes@emu.com', DEMO_EMAIL];
     const rows = [];
     for (let i = 0; i < 15; i++) {
       const d = new Date();
@@ -80,12 +80,12 @@
 
   // User list (for admin → Users panel)
   const MOCK_USERS = [
-    { email: 'juan.delacruz@hdjv.com',  status: 'Approved', role: 'user'  },
-    { email: 'maria.santos@hdjv.com',   status: 'Approved', role: 'user'  },
-    { email: 'pedro.reyes@hdjv.com',    status: 'Approved', role: 'admin' },
-    { email: 'new.applicant@hdjv.com',  status: 'Pending',  role: 'user'  },
-    { email: 'another.user@hdjv.com',   status: 'Pending',  role: 'user'  },
-    { email: 'rejected.user@hdjv.com',  status: 'Rejected', role: 'user'  },
+    { email: 'juan.delacruz@emu.com',  status: 'Approved', role: 'user'  },
+    { email: 'maria.santos@emu.com',   status: 'Approved', role: 'user'  },
+    { email: 'pedro.reyes@emu.com',    status: 'Approved', role: 'admin' },
+    { email: 'new.applicant@emu.com',  status: 'Pending',  role: 'user'  },
+    { email: 'another.user@emu.com',   status: 'Pending',  role: 'user'  },
+    { email: 'rejected.user@emu.com',  status: 'Rejected', role: 'user'  },
   ];
 
   // Request / idempotency logs
