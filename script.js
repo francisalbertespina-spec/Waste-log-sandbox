@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// HDJV WMS — script.js
+// WMS — script.js
 // ═══════════════════════════════════════════════════════════════════════════
 
 let selectedPackage       = "";
@@ -357,7 +357,7 @@ async function stampImageWithWatermark(file, email, pkg) {
           c.width = img.width; c.height = img.height; x.drawImage(img,0,0);
           const now = new Date(), p = n => String(n).padStart(2,"0");
           const ts = `${now.getFullYear()}-${p(now.getMonth()+1)}-${p(now.getDate())} ${p(now.getHours())}:${p(now.getMinutes())}`;
-          const lines = [`HDJV ENVI UNIT`,ts,`Lat:${lat.toFixed(4)} Lng:${lng.toFixed(4)}`,`User:${email}`,`Pkg:${pkg}`];
+          const lines = [`ENVI UNIT`,ts,`Lat:${lat.toFixed(4)} Lng:${lng.toFixed(4)}`,`User:${email}`,`Pkg:${pkg}`];
           const bfs=Math.max(40,Math.floor(c.width/28)),blh=bfs*1.5,bp=bfs;
           const calcH=lines.length*blh+bp*2, maxH=c.height*0.20, s=calcH>maxH?maxH/calcH:1;
           const fh=calcH>maxH?maxH:calcH, fs=bfs*s, lh=blh*s, pd=bp*s;
@@ -836,7 +836,7 @@ async function generateAnalyticsPDF() {
     doc.rect(0, 0, pw, 44, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');   doc.setFontSize(17);
-    doc.text('HDJV Waste Management System', m, 14);
+    doc.text('Waste Management System', m, 14);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
     doc.text((wtype === 'hazardous' ? 'Hazardous' : 'Solid') + ' Waste Analytics — Package ' + pkg.replace('P', ''), m, 24);
     doc.setFontSize(8);
@@ -1008,7 +1008,7 @@ function drawAnalyticsFooter(doc, ph, m, pw, page, total) {
   doc.setFillColor(245, 245, 245);
   doc.rect(0, ph - 11, pw, 11, 'F');
   doc.setTextColor(160, 160, 160); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-  doc.text('HDJV Environmental Management — Analytics Report — Confidential', m, ph - 4);
+  doc.text('Environmental Management — Analytics Report — Confidential', m, ph - 4);
   if (page && total) doc.text('Page ' + page + ' of ' + total, pw - m - 20, ph - 4);
 }
 
@@ -1025,7 +1025,7 @@ async function previewImage(event, formType) {
   canvas.width=w; canvas.height=h;
   const ctx=canvas.getContext("2d"); ctx.drawImage(bmp,0,0,w,h);
   const email=localStorage.getItem("userEmail")||"unknown", pkg=selectedPackage||"N/A";
-  let text=`HDJV ENVI UNIT\n${new Date().toLocaleString()}\n`;
+  let text=`ENVI UNIT\n${new Date().toLocaleString()}\n`;
   try { const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000})); text+=`Lat:${pos.coords.latitude.toFixed(6)} Lng:${pos.coords.longitude.toFixed(6)}\n`; } catch{text+=`Lat:N/A Lng:N/A\n`;}
   text+=`User:${email}\nPkg:${pkg}`;
   const lines=text.split("\n"),bfs=Math.max(40,Math.floor(w/28)),blh=bfs*1.5,bp=bfs;
@@ -1489,7 +1489,7 @@ async function generatePDFReport(type) {
       doc.rect(0, 0, pw, 40, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');   doc.setFontSize(17);
-      doc.text('HDJV Waste Management System', m, 15);
+      doc.text('Waste Management System', m, 15);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
       doc.text(`${type === 'hazardous' ? 'Hazardous' : 'Solid'} Waste Report — Package ${selectedPackage.replace('P', '')}`, m, 24);
       doc.setFontSize(8);
@@ -1629,7 +1629,7 @@ function drawPageFooter(doc, ph, m, pw, page, total) {
   doc.setFillColor(245, 245, 245);
   doc.rect(0, ph - 11, pw, 11, 'F');
   doc.setTextColor(160, 160, 160); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-  doc.text('HDJV Environmental Management — Confidential', m, ph - 4);
+  doc.text('Environmental Management — Confidential', m, ph - 4);
   if (page && total) doc.text(`Page ${page} of ${total}`, pw - m - 20, ph - 4);
 }
 
