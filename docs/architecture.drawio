@@ -1,5 +1,5 @@
 <mxfile host="app.diagrams.net" modified="2026-02-19T00:00:00.000Z" agent="Claude" version="21.0.0" type="device">
-  <diagram id="hdjv-wms-architecture" name="HDJV WMS Architecture">
+  <diagram id="wms-architecture" name="WMS Architecture">
     <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
@@ -8,7 +8,7 @@
         <!-- ═══════════════════════════════════════════════ -->
         <!-- TITLE -->
         <!-- ═══════════════════════════════════════════════ -->
-        <mxCell id="title" value="HDJV Waste Management System — Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+        <mxCell id="title" value="Waste Management System — Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
           <mxGeometry x="550" y="20" width="800" height="40" as="geometry" />
         </mxCell>
 
