@@ -1,7 +1,7 @@
 {
-  "name": "HDJV Waste Management System",
-  "short_name": "HDJV WMS",
-  "description": "Waste logging and management for HDJV Environmental Management",
+  "name": "Waste Management System",
+  "short_name": "WMS",
+  "description": "Waste logging and management for Environmental Management",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
