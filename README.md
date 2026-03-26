@@ -1,4 +1,4 @@
-# HDJV Waste Management System (WMS)
+# Waste Management System (WMS)
 
 > A Progressive Web App (PWA) for logging, tracking, and managing hazardous and solid waste across construction packages — built on Google Apps Script and Google Sheets, installable on Android and iOS without an app store.
 
@@ -23,7 +23,7 @@
 
 ## Overview
 
-The HDJV WMS allows field workers to log waste disposal activities per construction package (P4, P5, P6) for two waste categories: **Hazardous** and **Solid**. Admins manage user access, view analytics, and export reports — all backed by Google Sheets as the data store and Google Apps Script as the serverless backend.
+The WMS allows field workers to log waste disposal activities per construction package (P4, P5, P6) for two waste categories: **Hazardous** and **Solid**. Admins manage user access, view analytics, and export reports — all backed by Google Sheets as the data store and Google Apps Script as the serverless backend.
 
 The app is deployed as a **Progressive Web App** on GitHub Pages and can be installed directly to the home screen on Android (via Chrome) and iOS (via Safari) without going through any app store.
 
@@ -31,7 +31,7 @@ The app is deployed as a **Progressive Web App** on GitHub Pages and can be inst
 
 ## Architecture
 
-![HDJV WMS Architecture](docs/architecture.svg)
+![WMS Architecture](docs/architecture.svg)
 
 > Full interactive diagram: [Open in draw.io](https://viewer.diagrams.net/?url=https://raw.githubusercontent.com/francisalbertespina-spec/Waste-log-V5/main/docs/architecture.drawio)
 
