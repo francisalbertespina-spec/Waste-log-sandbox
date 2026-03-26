@@ -27,6 +27,9 @@ The WMS allows field workers to log waste disposal activities per construction p
 
 The app is deployed as a **Progressive Web App** on GitHub Pages and can be installed directly to the home screen on Android (via Chrome) and iOS (via Safari) without going through any app store.
 
+## 🧪 Live Demo
+**[Try the demo here](https://francisalbertespina-spec.github.io/Waste-log-sandbox/)** — no login required. Click "Try Demo" on the login screen to explore all features including admin dashboard, analytics, and waste logging.
+
 ---
 
 ## Architecture
@@ -283,4 +286,8 @@ To deploy updates:
 
 ## License
 
-Internal use — HDJV Environmental Management.
+MIT License — feel free to use this project as a reference or learning resource.
+
+Built by **E. Francis Albert** as a portfolio project demonstrating full-stack PWA development with Google Apps Script and Google Sheets.
+
+> Note: The Google Sheets IDs, Drive folder IDs, and Apps Script deployment URL in any live instance are private configuration — not included in this repository. See Getting Started to set up your own instance.
