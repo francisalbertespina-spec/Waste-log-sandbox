@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// HDJV WMS - Service Worker  (cache-first shell + push notifications)
+// WMS - Service Worker  (cache-first shell + push notifications)
 // ═══════════════════════════════════════════════════════════════════════════
 
 const SW_VERSION  = 'wms-sw-v2';
