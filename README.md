@@ -36,7 +36,7 @@ The app is deployed as a **Progressive Web App** on GitHub Pages and can be inst
 
 ![WMS Architecture](docs/architecture.svg)
 
-> Full interactive diagram: [Open in draw.io](https://viewer.diagrams.net/?url=https://raw.githubusercontent.com/francisalbertespina-spec/Waste-log-V5/main/docs/architecture.drawio)
+> Full interactive diagram: [Open in draw.io](https://viewer.diagrams.net/?url=https://raw.githubusercontent.com/francisalbertespina-spec/Waste-log-sandbox/main/docs/architecture.drawio)
 
 ---
 
